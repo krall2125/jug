@@ -1,0 +1,4 @@
+fun main(args string[]) -> int {
+	println "Hello, world!";
+	return 0;
+}
