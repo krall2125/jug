@@ -1,0 +1,15 @@
+fun main(args string[]) -> int {
+	let maybe_numbe int = 5;
+
+	println(maybe_numbe);
+
+	maybe_numbe += 5;
+
+	println(maybe_numbe);
+
+	maybe_numbe *= 3;
+
+	println(maybe_numbe);
+
+	return 0;
+}

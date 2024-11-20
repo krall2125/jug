@@ -1,4 +1,4 @@
 fun main(args string[]) -> int {
-	println "Hello, world!";
+	println("Hello, world!");
 	return 0;
 }
