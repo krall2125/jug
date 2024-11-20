@@ -13,18 +13,12 @@ bool str_endswith(char *str, char *suffix) {
 }
 
 int main(int argc, char **argv) {
-	Chunk chunk;
-
-	init_chunk(&chunk);
-	write_chunk(&chunk, OP_RETURN);
-
-	disassemble(&chunk, "test");
-
-	free_chunk(&chunk);
-
-	return 0;
 	for (int i = 1; i < argc; i++) {
-		printf("%s %d\n", argv[i], str_endswith(argv[i], ".jug"));
+		if (str_endswith(argv[i], ".jug")) {
+			char *contents = read_file(argv[i]);
+			printf("%s:\n%s\n", argv[i], contents);
+			free(contents);
+		}
 	}
 
 	return 0;
