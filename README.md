@@ -15,20 +15,3 @@ fun main(args string[]) -> int {
 	return 0;
 }
 ```
-
-variables
-```
-fun main(args string[]) -> int {
-	let maybe_numbe int = 5;
-
-	maybe_numbe += 9;
-
-	for (let i int :: 0..maybe_numbe) {
-		println i;
-		maybe_numbe *= 2;
-		println maybe_numbe;
-	}
-
-	return 0;
-}
-```
