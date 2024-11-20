@@ -11,7 +11,7 @@ ALSO CHECK OUT [kettlevm](https://github.com/hellory4n/kettlevm)
 hello world
 ```
 fun main(args string[]) -> int {
-	println "hello world";
+	println("hello world");
 	return 0;
 }
 ```
