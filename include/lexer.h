@@ -6,7 +6,7 @@ typedef enum {
 	TOK_DOT,          // .
 	TOK_COMMA,        // ,
 	TOK_SEMICOLON,    // ;
-	
+
 	TOK_COLON,        // :
 	TOK_DOUBLE_COLON, // ::
 
@@ -32,16 +32,16 @@ typedef enum {
 
 	TOK_SLASH,        // /
 	TOK_SLASH_EQUAL,  // /=
-	
+
 	TOK_MOD,          // %
 	TOK_MOD_EQUAL,    // %=
-	
+
 	TOK_LESS,         // <
 	TOK_LESS_EQUAL,   // <=
 
 	TOK_GREATER,      // >
 	TOK_GREATER_EQUAL, // >= (fuck you i ain't increasing shit in the other ones by a space)
-	
+
 	TOK_EQUAL,        // =
 	TOK_CMP_EQUAL,    // ==
 
@@ -61,6 +61,20 @@ typedef enum {
 
 	TOK_LOGICAL_NOT,  // !
 	TOK_LOG_NOT_EQUAL, // != (again)
+
+	TOK_IDENTIFIER,   // any identifier that's not a keyword
+	TOK_FUN,          // fun - truly the most fun keyword out there
+	TOK_RETURN,       // return
+	TOK_STRUCT,       // struct
+	TOK_INT,          // int | i32 | int32
+	TOK_INT8,         // int8 | i8
+	TOK_INT16,        // int16 | i16
+	TOK_INT64,        // int64 | i64
+	TOK_UINT,         // uint | u32 | uint32
+	TOK_UINT8,        // uint8 | u8
+	TOK_UINT16,       // uint16 | u16
+	TOK_UINT64,       // uint64 | u64
+	TOK_STRING,       // string
 } TokenType;
 
 typedef struct {
