@@ -8,7 +8,6 @@ typedef enum {
 	TOK_SEMICOLON,    // ;
 
 	TOK_COLON,        // :
-	TOK_DOUBLE_COLON, // ::
 
 	TOK_ROUND_OPEN,   // (
 	TOK_ROUND_CLOSE,  // )
@@ -75,6 +74,8 @@ typedef enum {
 	TOK_UINT16,       // uint16 | u16
 	TOK_UINT64,       // uint64 | u64
 	TOK_STRING,       // string
+	TOK_FOR,          // for
+	TOK_FOREACH,      // foreach
 } TokenType;
 
 typedef struct {
