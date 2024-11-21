@@ -82,4 +82,5 @@ typedef struct {
 	u32 line;
 	u32 character;
 	char *lexeme;
+	TokenType type;
 } Token;
