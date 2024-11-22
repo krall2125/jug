@@ -10,5 +10,5 @@ typedef struct {
 } TokenList;
 
 void zeroinit_tokenlist(TokenList *list);
-void push_tokenlist(TokenList *list);
+void push_tokenlist(TokenList *list, Token item);
 void free_tokenlist(TokenList *list);
