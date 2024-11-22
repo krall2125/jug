@@ -86,8 +86,27 @@ typedef struct {
 	TokenType type;
 } Token;
 
+// i have to include it in this weird place excuse me
+#include <tokenlist.h>
+
 typedef struct {
 	u32 current_line;
 	u32 current_char;
 	u32 iter;
+	char *code;
+	TokenList list;
 } Lexer;
+
+void lexer_init(Lexer *lexer, char *code);
+
+bool lexer_at_end(Lexer *lexer);
+bool lexer_match(Lexer *lexer, char c);
+char lexer_peek(Lexer *lexer);
+
+void lexer_advance(Lexer *lexer);
+void lexer_goback(Lexer *lexer);
+
+Token lexer_querytoken(Lexer *lexer);
+void lexer_lex(Lexer *lexer);
+
+void lexer_free(Lexer *lexer);
