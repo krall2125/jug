@@ -76,6 +76,7 @@ typedef enum {
 	TOK_STRING,       // string
 	TOK_FOR,          // for
 	TOK_FOREACH,      // foreach
+	TOK_LET,          // let
 } TokenType;
 
 typedef struct {
@@ -84,3 +85,9 @@ typedef struct {
 	char *lexeme;
 	TokenType type;
 } Token;
+
+typedef struct {
+	u32 current_line;
+	u32 current_char;
+	u32 iter;
+} Lexer;
