@@ -17,6 +17,11 @@ char *read_file(const char *path) {
 
 	char *bytes = malloc(sizeof(char) * (bytecount + 1));
 
+	if (bytes == NULL) {
+		fprintf(stderr, "fatal error buy more ram lol\n");
+		return NULL;
+	}
+
 	size_t bytes_read = fread(bytes, sizeof(char), bytecount, file);
 
 	bytes[bytes_read] = '\0';

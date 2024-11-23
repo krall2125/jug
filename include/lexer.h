@@ -102,6 +102,7 @@ void lexer_init(Lexer *lexer, char *code);
 bool lexer_at_end(Lexer *lexer);
 bool lexer_match(Lexer *lexer, char c);
 char lexer_peek(Lexer *lexer);
+char lexer_peek_next(Lexer *lexer);
 
 void lexer_advance(Lexer *lexer);
 void lexer_goback(Lexer *lexer);
