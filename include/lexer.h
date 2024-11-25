@@ -77,6 +77,19 @@ typedef enum {
 	TOK_FOR,          // for
 	TOK_FOREACH,      // foreach
 	TOK_LET,          // let
+	TOK_WHILE,        // while
+	TOK_DOUBLE,       // double
+	TOK_FLOAT,        // float
+
+	TOK_INTNUM,       // any integer constant
+	TOK_OCTNUM,       // any octal constant
+	TOK_BINNUM,       // any binary constant
+	TOK_HEXNUM,       // any hexadecimal constant
+	TOK_FLOATNUM,     // any floating point constant
+	TOK_STR,          // any string constante
+
+	TOK_EOF,
+	TOK_NONE,
 } TokenType;
 
 typedef struct {
