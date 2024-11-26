@@ -151,11 +151,34 @@ static bool is_octal(char c) {
 	return (c >= '0' && c <= '7');
 }
 
-static Token lexer_lexint(Lexer *lexer) {
+// this will lex both integers and floats
+static Token lexer_lexnum(Lexer *lexer) {
 	u32 start_char = lexer->current_char;
 	u32 start_line = lexer->current_line;
 
 	char *beginning = &lexer->code[lexer->iter];
+
+	while (isdigit(lexer_peek(lexer))) {
+		lexer_advance(lexer);
+	}
+
+	if (lexer_peek(lexer) != '.' || !isdigit(lexer_peek_next(lexer))) {
+		u32 count = (u32) (&lexer->code[lexer->iter] - beginning);
+
+		char *lexeme = ALLOC(char, (count + 1));
+
+		memcpy(lexeme, beginning, count);
+		lexeme[count] = '\0';
+
+		return (Token) {
+			.character = start_char,
+			.line = start_line,
+			.type = TOK_INTNUM,
+			.lexeme = lexeme
+		};
+	}
+
+	lexer_advance(lexer);
 
 	while (isdigit(lexer_peek(lexer))) {
 		lexer_advance(lexer);
@@ -171,7 +194,7 @@ static Token lexer_lexint(Lexer *lexer) {
 	return (Token) {
 		.character = start_char,
 		.line = start_line,
-		.type = TOK_INTNUM,
+		.type = TOK_FLOATNUM,
 		.lexeme = lexeme
 	};
 }
