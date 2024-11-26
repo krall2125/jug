@@ -4,6 +4,8 @@
 #include <common.h>
 #include <memory.h>
 
+#include <ctype.h>
+
 void lexer_init(Lexer *lexer, char *code) {
 	lexer->iter = 0;
 	lexer->current_char = 0;
@@ -60,7 +62,7 @@ static Token lexer_lexstr(Lexer *lexer) {
 	char *beginning = &lexer->code[lexer->iter];
 
 	// the amount of bytes to allocate for the string lexeme
-	while (!lexer_match(lexer, '\"') && lexer->code[lexer->iter - 1] != '\\') {
+	while (!lexer_at_end(lexer) && !lexer_match(lexer, '\"') && lexer->code[lexer->iter - 1] != '\\') {
 		lexer_advance(lexer);
 	}
 
@@ -124,8 +126,10 @@ static Token lexer_lexstr(Lexer *lexer) {
 			break;
 		}
 		default: {
-			complainf("Invalid escape character '%c' [%d, %d]\n", beginning[i + 1],
-				lexer->current_line, lexer->current_char - (count - i));
+			complainf("[%d, %d] Invalid escape character '%c'\n",
+				lexer->current_line,
+				lexer->current_char - (count - i),
+				beginning[i + 1]);
 			continue;
 		}
 		}
@@ -147,13 +151,38 @@ static bool is_octal(char c) {
 	return (c >= '0' && c <= '7');
 }
 
+static Token lexer_lexint(Lexer *lexer) {
+	u32 start_char = lexer->current_char;
+	u32 start_line = lexer->current_line;
+
+	char *beginning = &lexer->code[lexer->iter];
+
+	while (isdigit(lexer_peek(lexer))) {
+		lexer_advance(lexer);
+	}
+
+	u32 count = (u32) (&lexer->code[lexer->iter] - beginning);
+
+	char *lexeme = ALLOC(char, (count + 1));
+
+	memcpy(lexeme, beginning, count);
+	lexeme[count] = '\0';
+
+	return (Token) {
+		.character = start_char,
+		.line = start_line,
+		.type = TOK_INTNUM,
+		.lexeme = lexeme
+	};
+}
+
 static Token lexer_lexoct(Lexer *lexer) {
 	u32 start_char = lexer->current_char;
 	u32 start_line = lexer->current_line;
 
 	char *beginning = &lexer->code[lexer->iter];
 
-	while (is_octal(lexer_peek(lexer))) {
+	while (!lexer_at_end(lexer) && is_octal(lexer_peek(lexer))) {
 		lexer_advance(lexer);
 	}
 
@@ -169,6 +198,31 @@ static Token lexer_lexoct(Lexer *lexer) {
 		.character = start_char,
 		.line = start_line,
 		.type = TOK_OCTNUM,
+		.lexeme = lexeme
+	};
+}
+
+static Token lexer_lexbin(Lexer *lexer) {
+	u32 start_char = lexer->current_char;
+	u32 start_line = lexer->current_line;
+
+	char *beginning = &lexer->code[lexer->iter];
+
+	while (!lexer_at_end(lexer) && (lexer_peek(lexer) == '0' || lexer_peek(lexer) == '1')) {
+		lexer_advance(lexer);
+	}
+
+	u32 count = (u32) (&lexer->code[lexer->iter] - beginning);
+
+	char *lexeme = ALLOC(char, (count + 1));
+
+	memcpy(lexeme, beginning, count);
+	lexeme[count] = '\0';
+
+	return (Token) {
+		.character = start_char,
+		.line = start_line,
+		.type = TOK_BINNUM,
 		.lexeme = lexeme
 	};
 }
