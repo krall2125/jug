@@ -6,6 +6,18 @@
 
 #include <ctype.h>
 
+// additional functions that C stdlib doesn't have
+static bool is_octal(char c) {
+	return (c >= '0' && c <= '7');
+}
+
+// the main lexing function
+void lexer_lex(Lexer *lexer) {
+	for (u32 i = 0; i < strlen(lexer->code); i++) {
+		push_tokenlist(&lexer->list, lexer_querytoken(lexer));
+	}
+}
+
 void lexer_init(Lexer *lexer, char *code) {
 	lexer->iter = 0;
 	lexer->current_char = 0;
@@ -53,6 +65,9 @@ void lexer_goback(Lexer *lexer) {
 	if (lexer_peek(lexer) == '\n') {
 		lexer->current_line--;
 	}
+}
+
+Token lexer_querytoken(Lexer *lexer) {
 }
 
 static Token lexer_lexstr(Lexer *lexer) {
@@ -147,10 +162,6 @@ static Token lexer_lexstr(Lexer *lexer) {
 	};
 }
 
-static bool is_octal(char c) {
-	return (c >= '0' && c <= '7');
-}
-
 // this will lex both integers and floats
 static Token lexer_lexnum(Lexer *lexer) {
 	u32 start_char = lexer->current_char;
@@ -158,7 +169,7 @@ static Token lexer_lexnum(Lexer *lexer) {
 
 	char *beginning = &lexer->code[lexer->iter];
 
-	while (isdigit(lexer_peek(lexer))) {
+	while (!lexer_at_end(lexer) && isdigit(lexer_peek(lexer))) {
 		lexer_advance(lexer);
 	}
 
@@ -180,7 +191,7 @@ static Token lexer_lexnum(Lexer *lexer) {
 
 	lexer_advance(lexer);
 
-	while (isdigit(lexer_peek(lexer))) {
+	while (!lexer_at_end(lexer) && isdigit(lexer_peek(lexer))) {
 		lexer_advance(lexer);
 	}
 
@@ -211,11 +222,13 @@ static Token lexer_lexoct(Lexer *lexer) {
 
 	u32 count = (u32) (&lexer->code[lexer->iter] - beginning);
 
-	char *lexeme = ALLOC(char, (count + 1));
+	char *lexeme = ALLOC(char, (count + 2));
+
+	lexeme[0] = '0';
 
 	// copy the necessary bytes into the lexeme
-	memcpy(lexeme, beginning, count);
-	lexeme[count] = '\0';
+	memcpy(&lexeme[1], beginning, count);
+	lexeme[count + 1] = '\0';
 
 	return (Token) {
 		.character = start_char,
@@ -237,10 +250,12 @@ static Token lexer_lexbin(Lexer *lexer) {
 
 	u32 count = (u32) (&lexer->code[lexer->iter] - beginning);
 
-	char *lexeme = ALLOC(char, (count + 1));
+	char *lexeme = ALLOC(char, (count + 3));
 
+	lexeme[0] = '0';
+	lexeme[1] = 'b';
 	memcpy(lexeme, beginning, count);
-	lexeme[count] = '\0';
+	lexeme[count + 2] = '\0';
 
 	return (Token) {
 		.character = start_char,
@@ -250,11 +265,29 @@ static Token lexer_lexbin(Lexer *lexer) {
 	};
 }
 
-Token lexer_querytoken(Lexer *lexer) {
-}
+static Token lexer_lexhex(Lexer *lexer) {
+	u32 start_char = lexer->current_char;
+	u32 start_line = lexer->current_line;
 
-void lexer_lex(Lexer *lexer) {
-	for (u32 i = 0; i < strlen(lexer->code); i++) {
-		push_tokenlist(&lexer->list, lexer_querytoken(lexer));
+	char *beginning = &lexer->code[lexer->iter];
+
+	while (!lexer_at_end(lexer) && isxdigit(lexer_peek(lexer))) {
+		lexer_advance(lexer);
 	}
+
+	u32 count = (u32) (&lexer->code[lexer->iter] - beginning);
+
+	char *lexeme = ALLOC(char, (count + 3));
+
+	lexeme[0] = '0';
+	lexeme[1] = 'x';
+	memcpy(lexeme, beginning, count);
+	lexeme[count + 2] = '\0';
+
+	return (Token) {
+		.character = start_char,
+		.line = start_line,
+		.type = TOK_HEXNUM,
+		.lexeme = lexeme
+	};
 }
