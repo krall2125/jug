@@ -233,6 +233,62 @@ static Token lexer_lexid(Lexer *lexer) {
 			break;
 		}
 		break;
+	case 'e':
+		if (strlen(lexeme) != 4) break;
+
+		if (memcmp(&lexeme[1], "lse", 3) == 0) {
+			return (Token) {
+				.character = start_char,
+				.line = start_line,
+				.type = TOK_ELSE,
+				.lexeme = lexeme
+			};
+		}
+		else if (memcmp(&lexeme[1], "num", 3) == 0) {
+			return (Token) {
+				.character = start_char,
+				.line = start_line,
+				.type = TOK_ENUM,
+				.lexeme = lexeme
+			};
+		}
+		break;
+	case 'b':
+		if (strlen(lexeme) != 5) break;
+
+		if (memcmp(&lexeme[1], "reak", 4) == 0) {
+			return (Token) {
+				.character = start_char,
+				.line = start_line,
+				.type = TOK_BREAK,
+				.lexeme = lexeme
+			};
+		}
+		break;
+	case 'c':
+		switch (strlen(lexeme)) {
+		case 8:
+			if (memcmp(&lexeme[1], "ontinue", 7) == 0) {
+				return (Token) {
+					.character = start_char,
+					.line = start_line,
+					.type = TOK_CONTINUE,
+					.lexeme = lexeme
+				};
+			}
+			break;
+		case 5:
+			if (memcmp(&lexeme[1], "onst", 4) == 0) {
+				return (Token) {
+					.character = start_char,
+					.line = start_line,
+					.type = TOK_CONST,
+					.lexeme = lexeme
+				};
+			}
+			break;
+		}
+		break;
 	}
 }
 
