@@ -31,7 +31,7 @@ bool lexer_at_end(Lexer *lexer) {
 }
 
 bool lexer_match(Lexer *lexer, char c) {
-	return lexer_peek(lexer) == c;
+	return lexer_peek_next(lexer) == c;
 }
 
 char lexer_peek(Lexer *lexer) {
@@ -70,14 +70,76 @@ void lexer_goback(Lexer *lexer) {
 Token lexer_querytoken(Lexer *lexer) {
 }
 
+static Token lexer_lexid(Lexer *lexer) {
+	u32 start_char = lexer->current_char;
+	u32 start_line = lexer->current_line;
+
+	char *beginning = &lexer->code[lexer->iter];
+
+	while (!lexer_at_end(lexer) && isalnum(lexer_peek(lexer))) {
+		lexer_advance(lexer);
+	}
+
+	u32 count = (u32) (&lexer->code[lexer->iter] - beginning);
+
+	char *lexeme = ALLOC(char, (count + 1));
+
+	memcpy(lexeme, beginning, count);
+	lexeme[count] = '\0';
+
+	switch (lexeme[0]) {
+	case 'f':
+		switch (strlen(lexeme)) {
+		case 3:
+			if (memcmp(&lexeme[1], "un", 2) == 0) {
+				return (Token) {
+					.character = start_char,
+					.line = start_line,
+					.type = TOK_FUN,
+					.lexeme = lexeme
+				};
+			}
+			else if (memcmp(&lexeme[1], "or", 2) == 0) {
+				return (Token) {
+					.character = start_char,
+					.line = start_line,
+					.type = TOK_FOR,
+					.lexeme = lexeme
+				};
+			}
+			break;
+		case 5:
+			if (memcmp(&lexeme[1], "alse", 4) == 0) {
+				return (Token) {
+					.character = start_char,
+					.line = start_line,
+					.type = TOK_FALSE,
+					.lexeme = lexeme
+				};
+			}
+			break;
+		case 7:
+			if (memcmp(&lexeme[1], "oreach", 6) == 0) {
+				return (Token) {
+					.character = start_char,
+					.line = start_line,
+					.type = TOK_FOREACH,
+					.lexeme = lexeme
+				};
+			}
+			break;
+		}
+		break;
+	}
+}
+
 static Token lexer_lexstr(Lexer *lexer) {
 	u32 start_char = lexer->current_char;
 	u32 start_line = lexer->current_line;
 	lexer_advance(lexer);
 	char *beginning = &lexer->code[lexer->iter];
 
-	// the amount of bytes to allocate for the string lexeme
-	while (!lexer_at_end(lexer) && !lexer_match(lexer, '\"') && lexer->code[lexer->iter - 1] != '\\') {
+	while (!lexer_at_end(lexer) && lexer_peek(lexer) != '\"' && lexer->code[lexer->iter - 1] != '\\') {
 		lexer_advance(lexer);
 	}
 
@@ -254,7 +316,7 @@ static Token lexer_lexbin(Lexer *lexer) {
 
 	lexeme[0] = '0';
 	lexeme[1] = 'b';
-	memcpy(lexeme, beginning, count);
+	memcpy(&lexeme[2], beginning, count);
 	lexeme[count + 2] = '\0';
 
 	return (Token) {
@@ -281,7 +343,7 @@ static Token lexer_lexhex(Lexer *lexer) {
 
 	lexeme[0] = '0';
 	lexeme[1] = 'x';
-	memcpy(lexeme, beginning, count);
+	memcpy(&lexeme[2], beginning, count);
 	lexeme[count + 2] = '\0';
 
 	return (Token) {

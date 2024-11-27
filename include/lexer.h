@@ -61,10 +61,32 @@ typedef enum {
 	TOK_LOGICAL_NOT,  // !
 	TOK_LOG_NOT_EQUAL, // != (again)
 
+	// keywords and identifiers
 	TOK_IDENTIFIER,   // any identifier that's not a keyword
 	TOK_FUN,          // fun - truly the most fun keyword out there
 	TOK_RETURN,       // return
 	TOK_STRUCT,       // struct
+	TOK_FOR,          // for
+	TOK_FOREACH,      // foreach
+	TOK_LET,          // let
+	TOK_WHILE,        // while
+	TOK_DOUBLE,       // double
+	TOK_FLOAT,        // float
+	TOK_MATCH,        // match
+	TOK_IF,           // if
+	TOK_ELSE,         // else
+	TOK_BREAK,        // break
+	TOK_CONTINUE,     // continue
+	TOK_CONST,        // const
+	TOK_ENUM,         // enum
+	TOK_TRUE,         // True...
+	TOK_FALSE,        // fALSE,,,
+	TOK_NULL,         // null
+	TOK_TYPEOF,       // typeof
+	TOK_DATA,         // data
+	TOK_INTERFACE,    // interface
+	
+	// datatypes
 	TOK_INT,          // int | i32 | int32
 	TOK_INT8,         // int8 | i8
 	TOK_INT16,        // int16 | i16
@@ -74,12 +96,7 @@ typedef enum {
 	TOK_UINT16,       // uint16 | u16
 	TOK_UINT64,       // uint64 | u64
 	TOK_STRING,       // string
-	TOK_FOR,          // for
-	TOK_FOREACH,      // foreach
-	TOK_LET,          // let
-	TOK_WHILE,        // while
-	TOK_DOUBLE,       // double
-	TOK_FLOAT,        // float
+	TOK_VOID,         // void
 
 	TOK_INTNUM,       // any integer constant
 	TOK_OCTNUM,       // any octal constant
