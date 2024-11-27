@@ -117,6 +117,14 @@ static Token lexer_lexid(Lexer *lexer) {
 					.lexeme = lexeme
 				};
 			}
+			else if (memcmp(&lexeme[1], "loat", 4) == 0) {
+				return (Token) {
+					.character = start_char,
+					.line = start_line,
+					.type = TOK_FLOAT,
+					.lexeme = lexeme
+				};
+			}
 			break;
 		case 7:
 			if (memcmp(&lexeme[1], "oreach", 6) == 0) {
@@ -175,6 +183,54 @@ static Token lexer_lexid(Lexer *lexer) {
 				.type = TOK_WHILE,
 				.lexeme = lexeme
 			};
+		}
+		break;
+	case 'd':
+		if (strlen(lexeme) != 6) break;
+
+		if (memcmp(&lexeme[1], "ouble", 5) == 0) {
+			return (Token) {
+				.character = start_char,
+				.line = start_line,
+				.type = TOK_DOUBLE,
+				.lexeme = lexeme
+			};
+		}
+		break;
+	case 'm':
+		if (strlen(lexeme) != 5) break;
+
+		if (memcmp(&lexeme[1], "atch", 4) == 0) {
+			return (Token) {
+				.character = start_char,
+				.line = start_line,
+				.type = TOK_MATCH,
+				.lexeme = lexeme
+			};
+		}
+		break;
+	case 'i':
+		switch (strlen(lexeme)) {
+		case 2:
+			if (lexeme[1] == 'f') {
+				return (Token) {
+					.character = start_char,
+					.line = start_line,
+					.type = TOK_IF,
+					.lexeme = lexeme
+				};
+			}
+			break;
+		case 9:
+			if (memcmp(&lexeme[1], "nterface", 8) == 0) {
+				return (Token) {
+					.character = start_char,
+					.line = start_line,
+					.type = TOK_INTERFACE,
+					.lexeme = lexeme
+				};
+			}
+			break;
 		}
 		break;
 	}
