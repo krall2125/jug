@@ -186,15 +186,27 @@ static Token lexer_lexid(Lexer *lexer) {
 		}
 		break;
 	case 'd':
-		if (strlen(lexeme) != 6) break;
-
-		if (memcmp(&lexeme[1], "ouble", 5) == 0) {
-			return (Token) {
-				.character = start_char,
-				.line = start_line,
-				.type = TOK_DOUBLE,
-				.lexeme = lexeme
-			};
+		switch (strlen(lexeme)) {
+		case 6:
+			if (memcmp(&lexeme[1], "ouble", 5) == 0) {
+				return (Token) {
+					.character = start_char,
+					.line = start_line,
+					.type = TOK_DOUBLE,
+					.lexeme = lexeme
+				};
+			}
+			break;
+		case 4:
+			if (memcmp(&lexeme[1], "ata", 3) == 0) {
+				return (Token) {
+					.character = start_char,
+					.line = start_line,
+					.type = TOK_DATA,
+					.lexeme = lexeme
+				};
+			}
+			break;
 		}
 		break;
 	case 'm':
@@ -289,7 +301,50 @@ static Token lexer_lexid(Lexer *lexer) {
 			break;
 		}
 		break;
+	case 't':
+		switch (strlen(lexeme)) {
+		case 4:
+			if (memcmp(&lexeme[1], "rue", 3) == 0) {
+				return (Token) {
+					.character = start_char,
+					.line = start_line,
+					.type = TOK_TRUE,
+					.lexeme = lexeme
+				};
+			}
+			break;
+		case 6:
+			if (memcmp(&lexeme[1], "ypeof", 5) == 0) {
+				return (Token) {
+					.character = start_char,
+					.line = start_line,
+					.type = TOK_TYPEOF,
+					.lexeme = lexeme
+				};
+			}
+			break;
+		}
+		break;
+	case 'n':
+		if (strlen(lexeme) != 4) break;
+
+		if (memcmp(&lexeme[1], "ull", 3) == 0) {
+			return (Token) {
+				.character = start_char,
+				.line = start_line,
+				.type = TOK_NULL,
+				.lexeme = lexeme
+			};
+		}
+		break;
 	}
+
+	return (Token) {
+		.character = start_char,
+		.line = start_line,
+		.type = TOK_IDENTIFIER,
+		.lexeme = lexeme
+	};
 }
 
 static Token lexer_lexstr(Lexer *lexer) {
