@@ -49,7 +49,7 @@ void lexer_advance(Lexer *lexer) {
 		return;
 	}
 
-	if (lexer_match(lexer, '\n')) {
+	if (lexer_peek(lexer) == '\n') {
 		lexer->current_char = 0;
 		lexer->iter++;
 		lexer->current_line++;
@@ -69,15 +69,12 @@ void lexer_goback(Lexer *lexer) {
 	}
 }
 
-Token lexer_querytoken(Lexer *lexer) {
-}
-
 static Token maketoken(TokenType type, u32 character, u32 line, char *lexeme) {
 	return (Token) {
 		.character = character,
-		.line = line,
-		.type = type,
-		.lexeme = lexeme
+			.line = line,
+			.type = type,
+			.lexeme = lexeme
 	};
 }
 
@@ -366,4 +363,186 @@ static Token lexer_lexhex(Lexer *lexer) {
 	lexeme[count + 2] = '\0';
 
 	return maketoken(TOK_HEXNUM, start_char, start_line, lexeme);
+}
+
+Token lexer_querytoken(Lexer *lexer) {
+	switch (lexer_peek(lexer)) {
+	case '.':
+		return maketoken(TOK_DOT,
+			lexer->current_char, lexer->current_line,
+			NULL);
+	case ',':
+		return maketoken(TOK_COMMA,
+			lexer->current_char, lexer->current_line,
+			NULL);
+	case ';':
+		return maketoken(TOK_SEMICOLON,
+			lexer->current_char, lexer->current_line,
+			NULL);
+	case ':':
+		return maketoken(TOK_COLON,
+			lexer->current_char, lexer->current_line,
+			NULL);
+	case '(':
+		return maketoken(TOK_ROUND_OPEN,
+			lexer->current_char, lexer->current_line,
+			NULL);
+	case ')':
+		return maketoken(TOK_ROUND_CLOSE,
+			lexer->current_char, lexer->current_line,
+			NULL);
+	case '[':
+		return maketoken(TOK_SQUARE_OPEN,
+			lexer->current_char, lexer->current_line,
+			NULL);
+	case ']':
+		return maketoken(TOK_SQUARE_CLOSE,
+			lexer->current_char, lexer->current_line,
+			NULL);
+	case '{':
+		return maketoken(TOK_BRACE_OPEN,
+			lexer->current_char, lexer->current_line,
+			NULL);
+	case '}':
+		return maketoken(TOK_BRACE_CLOSE,
+			lexer->current_char, lexer->current_line,
+			NULL);
+	case '+':
+		return maketoken(
+			(lexer_match(lexer, '+') ?
+				TOK_INCREMENT :
+				lexer_match(lexer, '=') ?
+				TOK_PLUS_EQUAL :
+				TOK_PLUS),
+			lexer->current_char, lexer->current_line,
+			NULL);
+	case '-':
+		return maketoken(
+			(lexer_match(lexer, '>') ?
+				TOK_ARROW :
+				lexer_match(lexer, '-') ?
+				TOK_DECREMENT :
+				lexer_match(lexer, '=') ?
+				TOK_MINUS_EQUAL :
+				TOK_MINUS),
+			lexer->current_char, lexer->current_line,
+			NULL);
+	case '*':
+		return maketoken(
+			(lexer_match(lexer, '*') ?
+				TOK_POWER :
+				lexer_match(lexer, '=') ?
+				TOK_STAR_EQUAL :
+				TOK_STAR),
+			lexer->current_char, lexer->current_line,
+			NULL);
+	case '/':
+		if (lexer_match(lexer, '/')) {
+			while (!lexer_at_end(lexer) && lexer_peek(lexer) != '\n') {
+				lexer_advance(lexer);
+			}
+		}
+		return maketoken(
+			(lexer_match(lexer, '=') ?
+				TOK_SLASH_EQUAL :
+				TOK_SLASH),
+			lexer->current_char, lexer->current_line,
+			NULL);
+	case '%':
+		return maketoken(
+			(lexer_match(lexer, '=') ?
+				TOK_MOD_EQUAL :
+				TOK_MOD),
+			lexer->current_char, lexer->current_line,
+			NULL);
+	case '<':
+		return maketoken(
+			(lexer_match(lexer, '<') ?
+				TOK_LEFT_SHIFT :
+				lexer_match(lexer, '=') ?
+				TOK_LESS_EQUAL :
+				TOK_LESS),
+			lexer->current_char, lexer->current_line,
+			NULL);
+	case '>':
+		return maketoken(
+			(lexer_match(lexer, '>') ?
+				TOK_RIGHT_SHIFT :
+				lexer_match(lexer, '=') ?
+				TOK_GREATER_EQUAL :
+				TOK_GREATER),
+			lexer->current_char, lexer->current_line,
+			NULL);
+	case '=':
+		return maketoken(
+			(lexer_match(lexer, '=') ?
+				TOK_CMP_EQUAL :
+				TOK_EQUAL),
+			lexer->current_char, lexer->current_line,
+			NULL);
+	case '&':
+		return maketoken(
+			(lexer_match(lexer, '&') ?
+				TOK_LOGICAL_AND :
+				lexer_match(lexer, '=') ?
+				TOK_BIT_AND_EQUAL :
+				TOK_BITWISE_AND),
+			lexer->current_char, lexer->current_line,
+			NULL);
+	case '|':
+		return maketoken(
+			(lexer_match(lexer, '|') ?
+				TOK_LOGICAL_OR :
+				lexer_match(lexer, '=') ?
+				TOK_BIT_OR_EQUAL :
+				TOK_BITWISE_OR),
+			lexer->current_char, lexer->current_line,
+			NULL);
+	case '^':
+		return maketoken(
+			(lexer_match(lexer, '=') ?
+				TOK_BIT_XOR_EQUAL :
+				TOK_BITWISE_XOR),
+			lexer->current_char, lexer->current_line,
+			NULL);
+	case '~':
+		return maketoken(
+			(lexer_match(lexer, '=') ?
+				TOK_BIT_NOT_EQUAL :
+				TOK_BITWISE_NOT),
+			lexer->current_char, lexer->current_line,
+			NULL);
+	case '!':
+		return maketoken(
+			(lexer_match(lexer, '=') ?
+				TOK_LOG_NOT_EQUAL :
+				TOK_LOGICAL_NOT),
+			lexer->current_char, lexer->current_line,
+			NULL);
+	case '0':
+		switch (lexer_peek_next(lexer)) {
+		case '.':
+			return lexer_lexnum(lexer);
+		case 'x':
+		case 'X':
+			return lexer_lexhex(lexer);
+		case 'b':
+			return lexer_lexhex(lexer);
+		default:
+			return lexer_lexoct(lexer);
+		}
+	case '"':
+		return lexer_lexstr(lexer);
+	default:
+		if (isdigit(lexer_peek(lexer))) {
+			return lexer_lexnum(lexer);
+		}
+		else if (isalpha(lexer_peek(lexer))) {
+			return lexer_lexid(lexer);
+		}
+
+		complainf("unrecognized character skill issue '%c'\n", lexer_peek(lexer));
+	}
+
+	return maketoken(TOK_NONE, 0, 0, NULL);
 }
