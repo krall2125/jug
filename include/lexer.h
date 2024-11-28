@@ -37,9 +37,11 @@ typedef enum {
 
 	TOK_LESS,         // <
 	TOK_LESS_EQUAL,   // <=
+	TOK_LEFT_SHIFT,   // <<
 
 	TOK_GREATER,      // >
 	TOK_GREATER_EQUAL, // >= (fuck you i ain't increasing shit in the other ones by a space)
+	TOK_RIGHT_SHIFT,  // >>
 
 	TOK_EQUAL,        // =
 	TOK_CMP_EQUAL,    // ==
