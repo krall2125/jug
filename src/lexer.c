@@ -1,10 +1,12 @@
 #include <error.h>
 #include <lexer.h>
+#include <string.h>
 #include <tokenlist.h>
 #include <common.h>
 #include <memory.h>
 
 #include <ctype.h>
+#include <stdarg.h>
 
 // additional functions that C stdlib doesn't have
 static bool is_octal(char c) {
@@ -79,6 +81,31 @@ static Token maketoken(TokenType type, u32 character, u32 line, char *lexeme) {
 	};
 }
 
+static Token match_keywords(
+	u32 line, u32 character,
+	char *lexeme, ...
+) {
+	va_list ptr;
+
+	va_start(ptr, lexeme);
+
+	char *current;
+
+	while ((current = va_arg(ptr, char *)) != NULL) {
+		if (strcmp(lexeme, current) != 0) continue;
+
+		TokenType type = va_arg(ptr, TokenType);
+
+		va_end(ptr);
+
+		return maketoken(type, character, line, lexeme);
+	}
+
+	va_end(ptr);
+
+	return maketoken(TOK_IDENTIFIER, character, line, lexeme);
+}
+
 static Token lexer_lexid(Lexer *lexer) {
 	u32 start_char = lexer->current_char;
 	u32 start_line = lexer->current_line;
@@ -98,148 +125,53 @@ static Token lexer_lexid(Lexer *lexer) {
 
 	switch (lexeme[0]) {
 	case 'f':
-		switch (strlen(lexeme)) {
-		case 3:
-			if (memcmp(&lexeme[1], "un", 2) == 0) {
-				return maketoken(TOK_FUN, start_char, start_line, lexeme);
-			}
-
-			if (memcmp(&lexeme[1], "or", 2) != 0) break;
-
-			return maketoken(TOK_FOR, start_char, start_line, lexeme);
-			break;
-		case 5:
-			if (memcmp(&lexeme[1], "alse", 4) == 0) {
-				return maketoken(TOK_FALSE, start_char, start_line, lexeme);
-			}
-			
-			if (memcmp(&lexeme[1], "loat", 4) != 0) break;
-
-			return maketoken(TOK_FLOAT, start_char, start_line, lexeme);
-			break;
-		case 7:
-			if (memcmp(&lexeme[1], "oreach", 6) != 0) break;
-
-			return maketoken(TOK_FOREACH, start_char, start_line, lexeme);
-			break;
-		}
-		break;
+		return match_keywords(start_line, start_char, &lexeme[1],
+			"un", TOK_FUN,
+			"or", TOK_FOR,
+			"alse", TOK_FALSE,
+			"loat", TOK_FLOAT,
+			"oreach", TOK_FOREACH, NULL);
 	case 'r':
-		if (strlen(lexeme) != 6) break;
-
-		if (memcmp(&lexeme[1], "eturn", 5) != 0) break;
-
-		return maketoken(TOK_RETURN, start_char, start_line, lexeme);
-		break;
+		return match_keywords(start_line, start_char, &lexeme[1],
+			"eturn", TOK_RETURN, NULL);
 	case 's':
-		if (strlen(lexeme) != 6) break;
-
-		if (memcmp(&lexeme[1], "truct", 5) != 0) break;
-
-		return maketoken(TOK_STRUCT, start_char, start_line, lexeme);
-		break;
+		return match_keywords(start_line, start_char, &lexeme[1],
+			"truct", TOK_STRUCT, NULL);
 	case 'l':
-		if (strlen(lexeme) != 3) break;
-
-		if (memcmp(&lexeme[1], "et", 2) != 0) break;
-
-		return maketoken(TOK_LET, start_char, start_line, lexeme);
-		break;
+		return match_keywords(start_line, start_char, &lexeme[1],
+			"et", TOK_LET, NULL);
 	case 'w':
-		if (strlen(lexeme) != 5) break;
-
-		if (memcmp(&lexeme[1], "hile", 4) != 0) break;
-
-		return maketoken(TOK_WHILE, start_char, start_line, lexeme);
-		break;
+		return match_keywords(start_line, start_char, &lexeme[1],
+			"hile", TOK_WHILE, NULL);
 	case 'd':
-		switch (strlen(lexeme)) {
-		case 6:
-			if (memcmp(&lexeme[1], "ouble", 5) != 0) break;
-
-			return maketoken(TOK_DOUBLE, start_char, start_line, lexeme);
-			break;
-		case 4:
-			if (memcmp(&lexeme[1], "ata", 3) != 0) break;
-
-			return maketoken(TOK_DATA, start_char, start_line, lexeme);
-			break;
-		}
-		break;
+		return match_keywords(start_line, start_char, &lexeme[1],
+			"ouble", TOK_DOUBLE,
+			"ata", TOK_DATA, NULL);
 	case 'm':
-		if (strlen(lexeme) != 5) break;
-
-		if (memcmp(&lexeme[1], "atch", 4) != 0) break;
-
-		return maketoken(TOK_MATCH, start_char, start_line, lexeme);
-		break;
+		return match_keywords(start_line, start_char, &lexeme[1],
+			"atch", TOK_MATCH, NULL);
 	case 'i':
-		switch (strlen(lexeme)) {
-		case 2:
-			if (lexeme[1] != 'f') break;
-
-			return maketoken(TOK_IF, start_char, start_line, lexeme);
-			break;
-		case 9:
-			if (memcmp(&lexeme[1], "nterface", 8) != 0) break;
-
-			return maketoken(TOK_INTERFACE, start_char, start_line, lexeme);
-			break;
-		}
-		break;
+		return match_keywords(start_line, start_char, &lexeme[1],
+			"f", TOK_IF,
+			"nterface", TOK_INTERFACE, NULL);
 	case 'e':
-		if (strlen(lexeme) != 4) break;
-
-		if (memcmp(&lexeme[1], "lse", 3) == 0) {
-			return maketoken(TOK_ELSE, start_char, start_line, lexeme);
-		}
-
-		if (memcmp(&lexeme[1], "num", 3) != 0) break;
-
-		return maketoken(TOK_ENUM, start_char, start_line, lexeme);
-		break;
+		return match_keywords(start_line, start_char, &lexeme[1],
+			"lse", TOK_ELSE,
+			"num", TOK_ENUM, NULL);
 	case 'b':
-		if (strlen(lexeme) != 5) break;
-
-		if (memcmp(&lexeme[1], "reak", 4) != 0) break;
-
-		return maketoken(TOK_BREAK, start_char, start_line, lexeme);
-		break;
+		return match_keywords(start_line, start_char, &lexeme[1],
+			"reak", TOK_BREAK, NULL);
 	case 'c':
-		switch (strlen(lexeme)) {
-		case 8:
-			if (memcmp(&lexeme[1], "ontinue", 7) != 0) break;
-
-			return maketoken(TOK_CONTINUE, start_char, start_line, lexeme);
-			break;
-		case 5:
-			if (memcmp(&lexeme[1], "onst", 4) != 0) break;
-
-			return maketoken(TOK_CONST, start_char, start_line, lexeme);
-			break;
-		}
-		break;
+		return match_keywords(start_line, start_char, &lexeme[1],
+			"ontinue", TOK_CONTINUE,
+			"onst", TOK_CONST, NULL);
 	case 't':
-		switch (strlen(lexeme)) {
-		case 4:
-			if (memcmp(&lexeme[1], "rue", 3) != 0) break;
-
-			return maketoken(TOK_TRUE, start_char, start_line, lexeme);
-			break;
-		case 6:
-			if (memcmp(&lexeme[1], "ypeof", 5) != 0) break;
-
-			return maketoken(TOK_TYPEOF, start_char, start_line, lexeme);
-			break;
-		}
-		break;
+		return match_keywords(start_line, start_char, &lexeme[1],
+			"rue", TOK_TRUE,
+			"ypeof", TOK_TYPEOF, NULL);
 	case 'n':
-		if (strlen(lexeme) != 4) break;
-
-		if (memcmp(&lexeme[1], "ull", 3) != 0) break;
-
-		return maketoken(TOK_NULL, start_char, start_line, lexeme);
-		break;
+		return match_keywords(start_line, start_char, &lexeme[1],
+			"ull", TOK_NULL, NULL);
 	}
 
 	return maketoken(TOK_IDENTIFIER, start_char, start_line, lexeme);
@@ -328,12 +260,7 @@ static Token lexer_lexstr(Lexer *lexer) {
 
 	lexeme[count] = '\0';
 
-	return (Token) {
-		.character = start_char,
-		.line = start_line,
-		.type = TOK_STR,
-		.lexeme = lexeme
-	};
+	return maketoken(TOK_STR, start_char, start_line, lexeme);
 }
 
 // this will lex both integers and floats
@@ -355,12 +282,7 @@ static Token lexer_lexnum(Lexer *lexer) {
 		memcpy(lexeme, beginning, count);
 		lexeme[count] = '\0';
 
-		return (Token) {
-			.character = start_char,
-			.line = start_line,
-			.type = TOK_INTNUM,
-			.lexeme = lexeme
-		};
+		return maketoken(TOK_INTNUM, start_char, start_line, lexeme);
 	}
 
 	lexer_advance(lexer);
@@ -376,12 +298,7 @@ static Token lexer_lexnum(Lexer *lexer) {
 	memcpy(lexeme, beginning, count);
 	lexeme[count] = '\0';
 
-	return (Token) {
-		.character = start_char,
-		.line = start_line,
-		.type = TOK_FLOATNUM,
-		.lexeme = lexeme
-	};
+	return maketoken(TOK_FLOATNUM, start_char, start_line, lexeme);
 }
 
 static Token lexer_lexoct(Lexer *lexer) {
@@ -404,12 +321,7 @@ static Token lexer_lexoct(Lexer *lexer) {
 	memcpy(&lexeme[1], beginning, count);
 	lexeme[count + 1] = '\0';
 
-	return (Token) {
-		.character = start_char,
-		.line = start_line,
-		.type = TOK_OCTNUM,
-		.lexeme = lexeme
-	};
+	return maketoken(TOK_OCTNUM, start_char, start_line, lexeme);
 }
 
 static Token lexer_lexbin(Lexer *lexer) {
@@ -431,12 +343,7 @@ static Token lexer_lexbin(Lexer *lexer) {
 	memcpy(&lexeme[2], beginning, count);
 	lexeme[count + 2] = '\0';
 
-	return (Token) {
-		.character = start_char,
-		.line = start_line,
-		.type = TOK_BINNUM,
-		.lexeme = lexeme
-	};
+	return maketoken(TOK_BINNUM, start_char, start_line, lexeme);
 }
 
 static Token lexer_lexhex(Lexer *lexer) {
@@ -458,10 +365,5 @@ static Token lexer_lexhex(Lexer *lexer) {
 	memcpy(&lexeme[2], beginning, count);
 	lexeme[count + 2] = '\0';
 
-	return (Token) {
-		.character = start_char,
-		.line = start_line,
-		.type = TOK_HEXNUM,
-		.lexeme = lexeme
-	};
+	return maketoken(TOK_HEXNUM, start_char, start_line, lexeme);
 }
