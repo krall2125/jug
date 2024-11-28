@@ -70,6 +70,15 @@ void lexer_goback(Lexer *lexer) {
 Token lexer_querytoken(Lexer *lexer) {
 }
 
+static Token maketoken(TokenType type, u32 character, u32 line, char *lexeme) {
+	return (Token) {
+		.character = character,
+		.line = line,
+		.type = type,
+		.lexeme = lexeme
+	};
+}
+
 static Token lexer_lexid(Lexer *lexer) {
 	u32 start_char = lexer->current_char;
 	u32 start_line = lexer->current_line;
@@ -92,156 +101,89 @@ static Token lexer_lexid(Lexer *lexer) {
 		switch (strlen(lexeme)) {
 		case 3:
 			if (memcmp(&lexeme[1], "un", 2) == 0) {
-				return (Token) {
-					.character = start_char,
-					.line = start_line,
-					.type = TOK_FUN,
-					.lexeme = lexeme
-				};
+				return maketoken(TOK_FUN, start_char, start_line, lexeme);
 			}
-			else if (memcmp(&lexeme[1], "or", 2) == 0) {
-				return (Token) {
-					.character = start_char,
-					.line = start_line,
-					.type = TOK_FOR,
-					.lexeme = lexeme
-				};
-			}
+
+			if (memcmp(&lexeme[1], "or", 2) != 0) break;
+
+			return maketoken(TOK_FOR, start_char, start_line, lexeme);
 			break;
 		case 5:
 			if (memcmp(&lexeme[1], "alse", 4) == 0) {
-				return (Token) {
-					.character = start_char,
-					.line = start_line,
-					.type = TOK_FALSE,
-					.lexeme = lexeme
-				};
+				return maketoken(TOK_FALSE, start_char, start_line, lexeme);
 			}
-			else if (memcmp(&lexeme[1], "loat", 4) == 0) {
-				return (Token) {
-					.character = start_char,
-					.line = start_line,
-					.type = TOK_FLOAT,
-					.lexeme = lexeme
-				};
-			}
+			
+			if (memcmp(&lexeme[1], "loat", 4) != 0) break;
+
+			return maketoken(TOK_FLOAT, start_char, start_line, lexeme);
 			break;
 		case 7:
-			if (memcmp(&lexeme[1], "oreach", 6) == 0) {
-				return (Token) {
-					.character = start_char,
-					.line = start_line,
-					.type = TOK_FOREACH,
-					.lexeme = lexeme
-				};
-			}
+			if (memcmp(&lexeme[1], "oreach", 6) != 0) break;
+
+			return maketoken(TOK_FOREACH, start_char, start_line, lexeme);
 			break;
 		}
 		break;
 	case 'r':
 		if (strlen(lexeme) != 6) break;
 
-		if (memcmp(&lexeme[1], "eturn", 5) == 0) {
-			return (Token) {
-				.character = start_char,
-				.line = start_line,
-				.type = TOK_RETURN,
-				.lexeme = lexeme
-			};
-		}
+		if (memcmp(&lexeme[1], "eturn", 5) != 0) break;
+
+		return maketoken(TOK_RETURN, start_char, start_line, lexeme);
 		break;
 	case 's':
 		if (strlen(lexeme) != 6) break;
 
-		if (memcmp(&lexeme[1], "truct", 5) == 0) {
-			return (Token) {
-				.character = start_char,
-				.line = start_line,
-				.type = TOK_STRUCT,
-				.lexeme = lexeme
-			};
-		}
+		if (memcmp(&lexeme[1], "truct", 5) != 0) break;
+
+		return maketoken(TOK_STRUCT, start_char, start_line, lexeme);
+		break;
 	case 'l':
 		if (strlen(lexeme) != 3) break;
 
-		if (memcmp(&lexeme[1], "et", 2) == 0) {
-			return (Token) {
-				.character = start_char,
-				.line = start_line,
-				.type = TOK_LET,
-				.lexeme = lexeme
-			};
-		}
+		if (memcmp(&lexeme[1], "et", 2) != 0) break;
+
+		return maketoken(TOK_LET, start_char, start_line, lexeme);
 		break;
 	case 'w':
 		if (strlen(lexeme) != 5) break;
 
-		if (memcmp(&lexeme[1], "hile", 4) == 0) {
-			return (Token) {
-				.character = start_char,
-				.line = start_line,
-				.type = TOK_WHILE,
-				.lexeme = lexeme
-			};
-		}
+		if (memcmp(&lexeme[1], "hile", 4) != 0) break;
+
+		return maketoken(TOK_WHILE, start_char, start_line, lexeme);
 		break;
 	case 'd':
 		switch (strlen(lexeme)) {
 		case 6:
-			if (memcmp(&lexeme[1], "ouble", 5) == 0) {
-				return (Token) {
-					.character = start_char,
-					.line = start_line,
-					.type = TOK_DOUBLE,
-					.lexeme = lexeme
-				};
-			}
+			if (memcmp(&lexeme[1], "ouble", 5) != 0) break;
+
+			return maketoken(TOK_DOUBLE, start_char, start_line, lexeme);
 			break;
 		case 4:
-			if (memcmp(&lexeme[1], "ata", 3) == 0) {
-				return (Token) {
-					.character = start_char,
-					.line = start_line,
-					.type = TOK_DATA,
-					.lexeme = lexeme
-				};
-			}
+			if (memcmp(&lexeme[1], "ata", 3) != 0) break;
+
+			return maketoken(TOK_DATA, start_char, start_line, lexeme);
 			break;
 		}
 		break;
 	case 'm':
 		if (strlen(lexeme) != 5) break;
 
-		if (memcmp(&lexeme[1], "atch", 4) == 0) {
-			return (Token) {
-				.character = start_char,
-				.line = start_line,
-				.type = TOK_MATCH,
-				.lexeme = lexeme
-			};
-		}
+		if (memcmp(&lexeme[1], "atch", 4) != 0) break;
+
+		return maketoken(TOK_MATCH, start_char, start_line, lexeme);
 		break;
 	case 'i':
 		switch (strlen(lexeme)) {
 		case 2:
-			if (lexeme[1] == 'f') {
-				return (Token) {
-					.character = start_char,
-					.line = start_line,
-					.type = TOK_IF,
-					.lexeme = lexeme
-				};
-			}
+			if (lexeme[1] != 'f') break;
+
+			return maketoken(TOK_IF, start_char, start_line, lexeme);
 			break;
 		case 9:
-			if (memcmp(&lexeme[1], "nterface", 8) == 0) {
-				return (Token) {
-					.character = start_char,
-					.line = start_line,
-					.type = TOK_INTERFACE,
-					.lexeme = lexeme
-				};
-			}
+			if (memcmp(&lexeme[1], "nterface", 8) != 0) break;
+
+			return maketoken(TOK_INTERFACE, start_char, start_line, lexeme);
 			break;
 		}
 		break;
@@ -249,102 +191,58 @@ static Token lexer_lexid(Lexer *lexer) {
 		if (strlen(lexeme) != 4) break;
 
 		if (memcmp(&lexeme[1], "lse", 3) == 0) {
-			return (Token) {
-				.character = start_char,
-				.line = start_line,
-				.type = TOK_ELSE,
-				.lexeme = lexeme
-			};
+			return maketoken(TOK_ELSE, start_char, start_line, lexeme);
 		}
-		else if (memcmp(&lexeme[1], "num", 3) == 0) {
-			return (Token) {
-				.character = start_char,
-				.line = start_line,
-				.type = TOK_ENUM,
-				.lexeme = lexeme
-			};
-		}
+
+		if (memcmp(&lexeme[1], "num", 3) != 0) break;
+
+		return maketoken(TOK_ENUM, start_char, start_line, lexeme);
 		break;
 	case 'b':
 		if (strlen(lexeme) != 5) break;
 
-		if (memcmp(&lexeme[1], "reak", 4) == 0) {
-			return (Token) {
-				.character = start_char,
-				.line = start_line,
-				.type = TOK_BREAK,
-				.lexeme = lexeme
-			};
-		}
+		if (memcmp(&lexeme[1], "reak", 4) != 0) break;
+
+		return maketoken(TOK_BREAK, start_char, start_line, lexeme);
 		break;
 	case 'c':
 		switch (strlen(lexeme)) {
 		case 8:
-			if (memcmp(&lexeme[1], "ontinue", 7) == 0) {
-				return (Token) {
-					.character = start_char,
-					.line = start_line,
-					.type = TOK_CONTINUE,
-					.lexeme = lexeme
-				};
-			}
+			if (memcmp(&lexeme[1], "ontinue", 7) != 0) break;
+
+			return maketoken(TOK_CONTINUE, start_char, start_line, lexeme);
 			break;
 		case 5:
-			if (memcmp(&lexeme[1], "onst", 4) == 0) {
-				return (Token) {
-					.character = start_char,
-					.line = start_line,
-					.type = TOK_CONST,
-					.lexeme = lexeme
-				};
-			}
+			if (memcmp(&lexeme[1], "onst", 4) != 0) break;
+
+			return maketoken(TOK_CONST, start_char, start_line, lexeme);
 			break;
 		}
 		break;
 	case 't':
 		switch (strlen(lexeme)) {
 		case 4:
-			if (memcmp(&lexeme[1], "rue", 3) == 0) {
-				return (Token) {
-					.character = start_char,
-					.line = start_line,
-					.type = TOK_TRUE,
-					.lexeme = lexeme
-				};
-			}
+			if (memcmp(&lexeme[1], "rue", 3) != 0) break;
+
+			return maketoken(TOK_TRUE, start_char, start_line, lexeme);
 			break;
 		case 6:
-			if (memcmp(&lexeme[1], "ypeof", 5) == 0) {
-				return (Token) {
-					.character = start_char,
-					.line = start_line,
-					.type = TOK_TYPEOF,
-					.lexeme = lexeme
-				};
-			}
+			if (memcmp(&lexeme[1], "ypeof", 5) != 0) break;
+
+			return maketoken(TOK_TYPEOF, start_char, start_line, lexeme);
 			break;
 		}
 		break;
 	case 'n':
 		if (strlen(lexeme) != 4) break;
 
-		if (memcmp(&lexeme[1], "ull", 3) == 0) {
-			return (Token) {
-				.character = start_char,
-				.line = start_line,
-				.type = TOK_NULL,
-				.lexeme = lexeme
-			};
-		}
+		if (memcmp(&lexeme[1], "ull", 3) != 0) break;
+
+		return maketoken(TOK_NULL, start_char, start_line, lexeme);
 		break;
 	}
 
-	return (Token) {
-		.character = start_char,
-		.line = start_line,
-		.type = TOK_IDENTIFIER,
-		.lexeme = lexeme
-	};
+	return maketoken(TOK_IDENTIFIER, start_char, start_line, lexeme);
 }
 
 static Token lexer_lexstr(Lexer *lexer) {
