@@ -1,6 +1,7 @@
 #include <common.h>
 #include <bytecode.h>
 #include <debug.h>
+#include <lexer.h>
 
 bool str_endswith(char *str, char *suffix) {
 	str = strrchr(str, '.');
@@ -22,6 +23,14 @@ int main(int argc, char **argv) {
 			}
 
 			printf("%s:\n%s\n", argv[i], contents);
+
+			Lexer lexer;
+			lexer_init(&lexer, contents);
+
+			lexer_lex(&lexer);
+
+			lexer_free(&lexer);
+
 			free(contents);
 		}
 	}

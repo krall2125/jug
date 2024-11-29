@@ -1,7 +1,6 @@
 #include <error.h>
 #include <lexer.h>
 #include <string.h>
-#include <tokenlist.h>
 #include <common.h>
 #include <memory.h>
 
@@ -15,8 +14,15 @@ static bool is_octal(char c) {
 
 // the main lexing function
 void lexer_lex(Lexer *lexer) {
-	for (u32 i = 0; i < strlen(lexer->code); i++) {
+	while (!lexer_at_end(lexer)) {
 		push_tokenlist(&lexer->list, lexer_querytoken(lexer));
+		printf("[Type: %d, Line: %d, Character: %d, Lexeme: '%s']\n",
+				lexer->list.items[lexer->list.size - 1].type,
+				lexer->list.items[lexer->list.size - 1].line,
+				lexer->list.items[lexer->list.size - 1].character,
+				lexer->list.items[lexer->list.size - 1].lexeme == NULL ? ""
+				: lexer->list.items[lexer->list.size - 1].lexeme);
+		lexer_advance(lexer);
 	}
 }
 
@@ -28,8 +34,13 @@ void lexer_init(Lexer *lexer, char *code) {
 	zeroinit_tokenlist(&lexer->list);
 }
 
+void lexer_free(Lexer *lexer) {
+	free_tokenlist(&lexer->list);
+	lexer_init(lexer, NULL);
+}
+
 bool lexer_at_end(Lexer *lexer) {
-	return lexer_peek(lexer) == '\0';
+	return lexer_peek(lexer) == '\0' || lexer->iter >= strlen(lexer->code);
 }
 
 bool lexer_match(Lexer *lexer, char c) {
@@ -49,15 +60,19 @@ void lexer_advance(Lexer *lexer) {
 		return;
 	}
 
+	printf("advanci\n");
+
 	if (lexer_peek(lexer) == '\n') {
 		lexer->current_char = 0;
 		lexer->iter++;
 		lexer->current_line++;
+		printf("advance next lin\n");
 		return;
 	}
 
 	lexer->current_char++;
 	lexer->iter++;
+	printf("finish advanci\n");
 }
 
 void lexer_goback(Lexer *lexer) {
@@ -89,18 +104,25 @@ static Token match_keywords(
 	char *current;
 
 	while ((current = va_arg(ptr, char *)) != NULL) {
-		if (strcmp(lexeme, current) != 0) continue;
+		printf("comparing %s against %s\n", lexeme, current);
+		if (strlen(lexeme) == strlen(current) && memcmp(lexeme, current, strlen(lexeme) - 1) != 0) continue;
+		printf("finished compar\n");
 
 		TokenType type = va_arg(ptr, TokenType);
+		printf("arged\n");
 
 		va_end(ptr);
+		printf("endd\n");
 
-		return maketoken(type, character, line, lexeme);
+		printf("cumplete\n");
+		// sorry for this, this function is adapted for partial trie usage
+		return maketoken(type, character, line, lexeme - 1);
 	}
 
 	va_end(ptr);
 
-	return maketoken(TOK_IDENTIFIER, character, line, lexeme);
+	printf("cumplete identifier\n");
+	return maketoken(TOK_IDENTIFIER, character, line, lexeme - 1);
 }
 
 static Token lexer_lexid(Lexer *lexer) {
@@ -533,6 +555,9 @@ Token lexer_querytoken(Lexer *lexer) {
 		}
 	case '"':
 		return lexer_lexstr(lexer);
+	case ' ':
+	case '\t':
+		break;
 	default:
 		if (isdigit(lexer_peek(lexer))) {
 			return lexer_lexnum(lexer);

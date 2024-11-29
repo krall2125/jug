@@ -5,7 +5,10 @@ project(jug)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED TRUE)
 
-set(SOURCES src/main.c src/common.c src/bytecode.c src/memory.c src/debug.c)
+set(SOURCES src/main.c src/common.c
+	src/bytecode.c src/memory.c 
+	src/debug.c src/error.c
+	src/lexer.c src/tokenlist.c)
 add_executable(jug ${SOURCES})
 
 target_include_directories(jug PRIVATE ./include/)

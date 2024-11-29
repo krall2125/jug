@@ -118,8 +118,15 @@ typedef struct {
 	TokenType type;
 } Token;
 
-// i have to include it in this weird place excuse me
-#include <tokenlist.h>
+typedef struct {
+	size_t size;
+	size_t cap;
+	Token *items;
+} TokenList;
+
+void zeroinit_tokenlist(TokenList *list);
+void push_tokenlist(TokenList *list, Token item);
+void free_tokenlist(TokenList *list);
 
 typedef struct {
 	u32 current_line;

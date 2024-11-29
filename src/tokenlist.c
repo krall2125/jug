@@ -1,4 +1,4 @@
-#include <tokenlist.h>
+#include <lexer.h>
 #include <memory.h>
 
 void zeroinit_tokenlist(TokenList *list) {
