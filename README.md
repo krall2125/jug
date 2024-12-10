@@ -16,5 +16,4 @@ ALSO CHECK OUT [kettlevm](https://github.com/hellory4n/kettlevm) (JUG IS 10x BET
 hello world
 ```
 println("hello world");
-return 0;
 ```
