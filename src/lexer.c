@@ -105,7 +105,7 @@ static Token match_keywords(
 
 	while ((current = va_arg(ptr, char *)) != NULL) {
 		printf("comparing %s against %s\n", lexeme, current);
-		if (strlen(lexeme) == strlen(current) && memcmp(lexeme, current, strlen(lexeme) - 1) != 0) continue;
+		if (strcmp(lexeme, current)) continue;
 		printf("finished compar\n");
 
 		TokenType type = va_arg(ptr, TokenType);
