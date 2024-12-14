@@ -1,10 +1,71 @@
 const std = @import("std");
 
+pub fn lex(allocator: std.mem.Allocator, filename: []u8) !std.ArrayList(Token) {
+	var file = try std.fs.cwd().openFile(filename, .{});
+	defer file.close();
+
+	var buf_reader = std.io.bufferedReader(file.reader());
+	var in_stream = buf_reader.reader();
+
+	const file_stat = try file.stat();
+
+	const buffer = try allocator.alloc(u8, file_stat.size);
+	defer allocator.free(buffer);
+
+	try in_stream.readNoEof(buffer);
+
+	var iter: usize = 0;
+
+	var tokens = std.ArrayList(Token).init(allocator);
+
+	while (iter < buffer.len) : (iter += 1) {
+		const token = try read_token(allocator, buffer, &iter);
+
+		if (token.t == .TOK_NONE) {
+			continue;
+		}
+
+		try tokens.append(token);
+	}
+}
+
+fn read_token(allocator: std.mem.Allocator, buf: []u8, iter: *usize) !Token {
+	switch (buf[iter.*]) {
+	}
+}
+
 pub const Token = struct {
 	lexeme: []u8,
 	line: usize,
 	char: usize,
-	t: TokenType
+	t: TokenType,
+
+	pub fn new(t: TokenType, lexeme: []u8, line: usize, char: usize) Token {
+		return Token {
+			.lexeme = lexeme,
+			.line = line,
+			.char = char,
+			.t = t
+		};
+	}
+
+	pub fn eof(line: usize, char: usize) Token {
+		return Token {
+			.lexeme = "",
+			.line = line,
+			.char = char,
+			.t = .TOK_EOF
+		};
+	}
+
+	pub fn none(line: usize, char: usize) Token {
+		return Token {
+			.lexeme = "",
+			.line = line,
+			.char = char,
+			.t = .TOK_NONE
+		};
+	}
 };
 
 pub const TokenType = enum {
