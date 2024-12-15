@@ -1,38 +1,50 @@
 const std = @import("std");
 
-pub fn lex(allocator: std.mem.Allocator, filename: []u8) !std.ArrayList(Token) {
-	var file = try std.fs.cwd().openFile(filename, .{});
-	defer file.close();
+pub const Lexer = struct {
+	allocator: std.mem.Allocator,
+	tokens: std.ArrayList(Token),
+	buf: []u8,
+	i: usize,
 
-	var buf_reader = std.io.bufferedReader(file.reader());
-	var in_stream = buf_reader.reader();
+	pub fn lex(allocator: std.mem.Allocator, filename: []u8) !Lexer {
+		var file = try std.fs.cwd().openFile(filename, .{});
+		defer file.close();
 
-	const file_stat = try file.stat();
+		var buf_reader = std.io.bufferedReader(file.reader());
+		var in_stream = buf_reader.reader();
 
-	const buffer = try allocator.alloc(u8, file_stat.size);
-	defer allocator.free(buffer);
+		const file_stat = try file.stat();
 
-	try in_stream.readNoEof(buffer);
+		const buffer = try allocator.alloc(u8, file_stat.size);
+		defer allocator.free(buffer);
 
-	var iter: usize = 0;
+		var lexer = &Lexer {
+			.allocator = allocator,
+			.tokens = std.ArrayList(Token).init(allocator),
+			.buf = buffer,
+			.i = 0
+		};
 
-	var tokens = std.ArrayList(Token).init(allocator);
+		try in_stream.readNoEof(buffer);
 
-	while (iter < buffer.len) : (iter += 1) {
-		const token = try read_token(allocator, buffer, &iter);
+		while (lexer.i < buffer.len) : (lexer.i += 1) {
+			const token = try lexer.read_token();
 
-		if (token.t == .TOK_NONE) {
-			continue;
+			if (token.t == .TOK_NONE) {
+				continue;
+			}
+
+			try lexer.tokens.append(token);
 		}
 
-		try tokens.append(token);
+		return lexer;
 	}
-}
 
-fn read_token(allocator: std.mem.Allocator, buf: []u8, iter: *usize) !Token {
-	switch (buf[iter.*]) {
+	fn read_token(self: *Lexer) !Token {
+		switch (self.buf[self.i]) {
+		}
 	}
-}
+};
 
 pub const Token = struct {
 	lexeme: []u8,
